@@ -1,0 +1,28 @@
+{
+  "expo": {
+    "name": "EasyTrade",
+    "slug": "easytrade",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.easytrade.app"
+    },
+    "android": {
+      "package": "com.easytrade.app",
+      "versionCode": 1,
+      "permissions": [
+        "android.permission.INTERNET",
+        "android.permission.ACCESS_NETWORK_STATE"
+      ]
+    },
+    "web": {},
+    "extra": {
+      "apiUrl": "https://easytrade-production-c515.up.railway.app/api"
+    }
+  }
+}
