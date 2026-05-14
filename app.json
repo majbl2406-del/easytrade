@@ -22,7 +22,10 @@
     },
     "web": {},
     "extra": {
-      "apiUrl": "https://easytrade-production-c515.up.railway.app/api"
+      "apiUrl": "https://easytrade-production-c515.up.railway.app/api",
+      "eas": {
+        "projectId": "834dc67f-053d-4532-abc3-4f5803cca4cc"
+      }
     }
   }
 }

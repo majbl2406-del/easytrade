@@ -3,7 +3,7 @@ import {
   View, Text, StyleSheet, FlatList, TouchableOpacity,
   TextInput, Image, Alert, Modal, ActivityIndicator, RefreshControl, ScrollView,
 } from 'react-native';
-import Icon from 'react-native-vector-icons/MaterialIcons';
+import { MaterialIcons } from '@expo/vector-icons';
 import { THEME } from '../../theme';
 import api from '../../services/api';
 import ScreenTransition from '../../components/ScreenTransition';
@@ -205,7 +205,7 @@ export default function ProduitsScreen({ route, navigation }) {
         <Image source={{ uri: item.image }} style={styles.productImage} />
       ) : (
         <View style={styles.imagePlaceholder}>
-          <Icon name="inventory" size={40} color={THEME.gray} />
+          <MaterialIcons  name="inventory" size={40} color={THEME.gray} />
         </View>
       )}
 
@@ -235,7 +235,7 @@ export default function ProduitsScreen({ route, navigation }) {
         style={styles.addButton}
         onPress={() => { setSelectedProduct(item); setModalVisible(true); }}
       >
-        <Icon name="add-shopping-cart" size={24} color={THEME.white} />
+        <MaterialIcons  name="add-shopping-cart" size={24} color={THEME.white} />
       </TouchableOpacity>
     </TouchableOpacity>
   );
@@ -256,7 +256,7 @@ export default function ProduitsScreen({ route, navigation }) {
             <View style={styles.confirmHeader}>
               <Text style={styles.confirmTitle}>🛒 Récapitulatif de commande</Text>
               <TouchableOpacity onPress={fermerConfirmModal}>
-                <Icon name="close" size={26} color={THEME.gray} />
+                <MaterialIcons  name="close" size={26} color={THEME.gray} />
               </TouchableOpacity>
             </View>
 
@@ -312,7 +312,7 @@ export default function ProduitsScreen({ route, navigation }) {
               {/* Feedback code promo */}
               {codePromoValide === true && reductionInfo && (
                 <View style={styles.codePromoFeedbackValide}>
-                  <Icon name="check-circle" size={18} color="#4CAF50" />
+                  <MaterialIcons  name="check-circle" size={18} color="#4CAF50" />
                   <Text style={styles.codePromoFeedbackTexteValide}>
                     {reductionInfo.nom} — -{reductionInfo.reduction} DH
                   </Text>
@@ -320,7 +320,7 @@ export default function ProduitsScreen({ route, navigation }) {
               )}
               {codePromoValide === false && (
                 <View style={styles.codePromoFeedbackInvalide}>
-                  <Icon name="cancel" size={18} color={THEME.error} />
+                  <MaterialIcons  name="cancel" size={18} color={THEME.error} />
                   <Text style={styles.codePromoFeedbackTexteInvalide}>
                     Code invalide ou déjà utilisé
                   </Text>
@@ -379,7 +379,7 @@ export default function ProduitsScreen({ route, navigation }) {
       {/* Recherche et filtres */}
       <View style={styles.searchContainer}>
         <View style={[styles.searchBar, isRTL && { flexDirection: 'row-reverse' }]}>
-          <Icon name="search" size={20} color={THEME.gray} />
+          <MaterialIcons  name="search" size={20} color={THEME.gray} />
           <TextInput
             style={[styles.searchInput, isRTL && { textAlign: 'right' }]}
             placeholder={t('search_product')}
@@ -387,7 +387,7 @@ export default function ProduitsScreen({ route, navigation }) {
             onChangeText={setSearchQuery}
             placeholderTextColor={THEME.gray}
           />
-          <Icon name="psychology" size={20} color={THEME.accent} />
+          <MaterialIcons  name="psychology" size={20} color={THEME.accent} />
         </View>
 
         {searchQuery.trim() && correctedQuery && correctedQuery !== searchQuery.toLowerCase() && (
@@ -428,7 +428,7 @@ export default function ProduitsScreen({ route, navigation }) {
             }}
           >
             <Text style={styles.sortButtonText}>{getSortLabel()}</Text>
-            <Icon name="sort" size={18} color={THEME.primary} />
+            <MaterialIcons  name="sort" size={18} color={THEME.primary} />
           </TouchableOpacity>
         </View>
       </View>
@@ -452,7 +452,7 @@ export default function ProduitsScreen({ route, navigation }) {
             </View>
           ) : (
             <View style={styles.emptyContainer}>
-              <Icon name="inventory" size={60} color={THEME.gray} />
+              <MaterialIcons  name="inventory" size={60} color={THEME.gray} />
               <Text style={styles.emptyText}>{t('no_product_found')}</Text>
             </View>
           )
@@ -465,7 +465,7 @@ export default function ProduitsScreen({ route, navigation }) {
           style={styles.panierButton}
           onPress={() => setConfirmModalVisible(true)}
         >
-          <Icon name="shopping-cart" size={24} color={THEME.white} />
+          <MaterialIcons  name="shopping-cart" size={24} color={THEME.white} />
           <View style={styles.panierBadge}>
             <Text style={styles.panierBadgeText}>{panier.length}</Text>
           </View>
@@ -492,11 +492,11 @@ export default function ProduitsScreen({ route, navigation }) {
                   </Text>
                   <View style={styles.quantityControls}>
                     <TouchableOpacity style={styles.quantityButton} onPress={() => setQuantity(Math.max(1, quantity - 1))}>
-                      <Icon name="remove" size={24} color={THEME.white} />
+                      <MaterialIcons  name="remove" size={24} color={THEME.white} />
                     </TouchableOpacity>
                     <Text style={styles.quantityText}>{quantity}</Text>
                     <TouchableOpacity style={styles.quantityButton} onPress={() => setQuantity(quantity + 1)}>
-                      <Icon name="add" size={24} color={THEME.white} />
+                      <MaterialIcons  name="add" size={24} color={THEME.white} />
                     </TouchableOpacity>
                   </View>
                 </View>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Alert, ActivityIndicator, RefreshControl, Modal, Pressable } from 'react-native';
-import Icon from 'react-native-vector-icons/MaterialIcons';
+import { MaterialIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { THEME } from '../../theme';
@@ -94,7 +94,9 @@ export default function ProfileScreen({ navigation, onLogout }) {
         {/* En-tête */}
         <View style={styles.header}>
           <View style={styles.avatarContainer}>
-            <Icon name="person" size={60} color={THEME.white} />
+            <MaterialIcons 
+
+name="person" size={60} color={THEME.white} />
           </View>
           <Text style={styles.userName}>{userData.nom} {userData.prenom}</Text>
           <Text style={styles.userEmail}>{userData.email}</Text>
@@ -103,17 +105,23 @@ export default function ProfileScreen({ navigation, onLogout }) {
         {/* Statistiques */}
         <View style={[styles.statsContainer, rowDir]}>
           <View style={styles.statBox}>
-            <Icon name="shopping-cart" size={30} color={THEME.primary} />
+            <MaterialIcons 
+
+name="shopping-cart" size={30} color={THEME.primary} />
             <Text style={styles.statValue}>{stats.commandesTotales}</Text>
             <Text style={styles.statLabel}>{t('orders')}</Text>
           </View>
           <View style={styles.statBox}>
-            <Icon name="attach-money" size={30} color={THEME.success} />
+            <MaterialIcons 
+
+name="attach-money" size={30} color={THEME.success} />
             <Text style={styles.statValue}>{stats.totalDepense} DH</Text>
             <Text style={styles.statLabel}>{t('spent')}</Text>
           </View>
           <View style={styles.statBox}>
-            <Icon name="school" size={30} color={THEME.accent} />
+            <MaterialIcons 
+
+name="school" size={30} color={THEME.accent} />
             <Text style={styles.statValue}>{stats.formationsTerminees}</Text>
             <Text style={styles.statLabel}>{t('trainings')}</Text>
           </View>
@@ -124,7 +132,9 @@ export default function ProfileScreen({ navigation, onLogout }) {
           <View style={[styles.sectionHeader, rowDir]}>
             <Text style={[styles.sectionTitle, align]}>{t('personal_info')}</Text>
             <TouchableOpacity onPress={() => setEditing(!editing)}>
-              <Icon name={editing ? 'close' : 'edit'} size={24} color={THEME.primary} />
+              <MaterialIcons 
+
+name={editing ? 'close' : 'edit'} size={24} color={THEME.primary} />
             </TouchableOpacity>
           </View>
 
@@ -165,32 +175,46 @@ export default function ProfileScreen({ navigation, onLogout }) {
 
           <TouchableOpacity style={[styles.optionItem, rowDir]} onPress={() => navigation.navigate('Points')}>
             <View style={[styles.optionLeft, rowDir]}>
-              <Icon name="stars" size={24} color={THEME.accent} />
+              <MaterialIcons 
+
+name="stars" size={24} color={THEME.accent} />
               <Text style={styles.optionText}>{t('my_points')}</Text>
             </View>
-            <Icon name={isRTL ? 'chevron-left' : 'chevron-right'} size={24} color={THEME.gray} />
+            <MaterialIcons 
+
+name={isRTL ? 'chevron-left' : 'chevron-right'} size={24} color={THEME.gray} />
           </TouchableOpacity>
 
           <TouchableOpacity style={[styles.optionItem, rowDir]} onPress={() => navigation.navigate('Commandes')}>
             <View style={[styles.optionLeft, rowDir]}>
-              <Icon name="history" size={24} color={THEME.secondary} />
+              <MaterialIcons 
+
+name="history" size={24} color={THEME.secondary} />
               <Text style={styles.optionText}>{t('order_history')}</Text>
             </View>
-            <Icon name={isRTL ? 'chevron-left' : 'chevron-right'} size={24} color={THEME.gray} />
+            <MaterialIcons 
+
+name={isRTL ? 'chevron-left' : 'chevron-right'} size={24} color={THEME.gray} />
           </TouchableOpacity>
 
           <TouchableOpacity style={[styles.optionItem, rowDir]} onPress={() => setAboutVisible(true)}>
             <View style={[styles.optionLeft, rowDir]}>
-              <Icon name="info" size={24} color={THEME.primary} />
+              <MaterialIcons 
+
+name="info" size={24} color={THEME.primary} />
               <Text style={styles.optionText}>{t('about')}</Text>
             </View>
-            <Icon name={isRTL ? 'chevron-left' : 'chevron-right'} size={24} color={THEME.gray} />
+            <MaterialIcons 
+
+name={isRTL ? 'chevron-left' : 'chevron-right'} size={24} color={THEME.gray} />
           </TouchableOpacity>
         </View>
 
         {/* Déconnexion */}
         <TouchableOpacity style={[styles.logoutButton, rowDir]} onPress={logout}>
-          <Icon name="logout" size={24} color={THEME.white} />
+          <MaterialIcons 
+
+name="logout" size={24} color={THEME.white} />
           <Text style={styles.logoutButtonText}>{t('logout')}</Text>
         </TouchableOpacity>
       </ScrollView>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, ActivityIndicator, RefreshControl } from 'react-native';
-import Icon from 'react-native-vector-icons/MaterialIcons';
+import { MaterialIcons } from '@expo/vector-icons';
 import { THEME } from '../../theme';
 import api from '../../services/api';
 import ScreenTransition from '../../components/ScreenTransition';
@@ -88,7 +88,7 @@ export default function PointsScreen() {
       >
         {/* En-tête avec total de points */}
         <View style={styles.header}>
-          <Icon name="stars" size={60} color={THEME.accent} />
+          <MaterialIcons  name="stars" size={60} color={THEME.accent} />
           <Text style={styles.pointsTotal}>{loading ? '...' : pointsData.total}</Text>
           <Text style={styles.pointsLabel}>{t('points_available')}</Text>
         </View>
@@ -99,19 +99,19 @@ export default function PointsScreen() {
             {t('how_to_earn')}
           </Text>
           <View style={[styles.infoItem, isRTL && { flexDirection: 'row-reverse' }]}>
-            <Icon name="shopping-cart" size={20} color={THEME.primary} />
+            <MaterialIcons  name="shopping-cart" size={20} color={THEME.primary} />
             <Text style={[styles.infoText, isRTL && { textAlign: 'right' }]}>
               {t('earn_orders')}
             </Text>
           </View>
           <View style={[styles.infoItem, isRTL && { flexDirection: 'row-reverse' }]}>
-            <Icon name="school" size={20} color={THEME.accent} />
+            <MaterialIcons  name="school" size={20} color={THEME.accent} />
             <Text style={[styles.infoText, isRTL && { textAlign: 'right' }]}>
               {t('earn_trainings')}
             </Text>
           </View>
           <View style={[styles.infoItem, isRTL && { flexDirection: 'row-reverse' }]}>
-            <Icon name="card-giftcard" size={20} color={THEME.success} />
+            <MaterialIcons  name="card-giftcard" size={20} color={THEME.success} />
             <Text style={[styles.infoText, isRTL && { textAlign: 'right' }]}>
               {t('earn_promotions')}
             </Text>
@@ -148,7 +148,7 @@ export default function PointsScreen() {
                   styles.recompenseCost,
                   pointsData.total < recompense.points && styles.recompenseCostDisabled,
                 ]}>
-                  <Icon
+                  <MaterialIcons 
                     name="stars"
                     size={20}
                     color={pointsData.total >= recompense.points ? THEME.accent : THEME.gray}

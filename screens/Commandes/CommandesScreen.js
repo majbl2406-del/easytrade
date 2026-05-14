@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, RefreshControl, Modal, ActivityIndicator } from 'react-native';
-import Icon from 'react-native-vector-icons/MaterialIcons';
+import { MaterialIcons } from '@expo/vector-icons';
 import { THEME } from '../../theme';
 import api from '../../services/api';
 import ScreenTransition from '../../components/ScreenTransition';
@@ -70,22 +70,22 @@ export default function CommandesScreen() {
             <Text style={styles.commandeDate}>{new Date(item.date).toLocaleDateString('fr-FR')}</Text>
           </View>
           <View style={[styles.statutBadge, { backgroundColor: STATUT_COLORS[item.statut] }]}>
-            <Icon name={STATUT_ICONS[item.statut]} size={16} color={THEME.white} />
+            <MaterialIcons  name={STATUT_ICONS[item.statut]} size={16} color={THEME.white} />
             <Text style={styles.statutText}>{STATUTS_LABELS[item.statut]}</Text>
           </View>
         </View>
 
         <View style={styles.cardContent}>
           <View style={[styles.infoRow, isRTL && { flexDirection: 'row-reverse' }]}>
-            <Icon name="store" size={18} color={THEME.gray} />
+            <MaterialIcons  name="store" size={18} color={THEME.gray} />
             <Text style={styles.infoText}>{item.fournisseurNom}</Text>
           </View>
           <View style={[styles.infoRow, isRTL && { flexDirection: 'row-reverse' }]}>
-            <Icon name="inventory" size={18} color={THEME.gray} />
+            <MaterialIcons  name="inventory" size={18} color={THEME.gray} />
             <Text style={styles.infoText}>{item.nombreProduits} {t('products_label').replace(':', '')}</Text>
           </View>
           <View style={[styles.infoRow, isRTL && { flexDirection: 'row-reverse' }]}>
-            <Icon name="attach-money" size={18} color={THEME.gray} />
+            <MaterialIcons  name="attach-money" size={18} color={THEME.gray} />
             <Text style={styles.totalText}>{item.montantTotal} DH</Text>
           </View>
         </View>
@@ -112,7 +112,7 @@ export default function CommandesScreen() {
             <View style={[styles.modalHeader, isRTL && { flexDirection: 'row-reverse' }]}>
               <Text style={styles.modalTitle}>{t('order_number')}{selectedCommande.id}</Text>
               <TouchableOpacity onPress={() => setModalVisible(false)}>
-                <Icon name="close" size={28} color={THEME.gray} />
+                <MaterialIcons  name="close" size={28} color={THEME.gray} />
               </TouchableOpacity>
             </View>
 
@@ -125,7 +125,7 @@ export default function CommandesScreen() {
                   <View key={statut} style={[styles.trackingStep, isRTL && { flexDirection: 'row-reverse' }]}>
                     <View style={styles.stepIndicatorContainer}>
                       <View style={[styles.stepIndicator, isCompleted && styles.stepIndicatorCompleted, isCurrent && styles.stepIndicatorCurrent]}>
-                        {isCompleted ? <Icon name="check" size={20} color={THEME.white} /> : <Text style={styles.stepNumber}>{index + 1}</Text>}
+                        {isCompleted ? <MaterialIcons  name="check" size={20} color={THEME.white} /> : <Text style={styles.stepNumber}>{index + 1}</Text>}
                       </View>
                       {index < STATUTS_LIST.length - 1 && <View style={[styles.stepLine, isCompleted && styles.stepLineCompleted]} />}
                     </View>
@@ -205,7 +205,7 @@ export default function CommandesScreen() {
             </View>
           ) : (
             <View style={styles.emptyContainer}>
-              <Icon name="shopping-cart" size={80} color={THEME.gray} />
+              <MaterialIcons  name="shopping-cart" size={80} color={THEME.gray} />
               <Text style={styles.emptyText}>
                 {filter === 'all' ? t('no_orders') : filter === 'in_progress' ? t('no_orders_in_progress') : t('no_orders_completed')}
               </Text>

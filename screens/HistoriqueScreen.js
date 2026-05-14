@@ -3,7 +3,7 @@ import {
   View, Text, StyleSheet, FlatList, TouchableOpacity,
   RefreshControl, ActivityIndicator, SafeAreaView,
 } from 'react-native';
-import Icon from 'react-native-vector-icons/MaterialIcons';
+import { MaterialIcons } from '@expo/vector-icons';
 import { THEME } from '../theme';
 import api from '../services/api';
 import { useLanguage } from '../i18n/LanguageContext';
@@ -141,7 +141,7 @@ const formatItem = (item) => {
         <View style={styles.card}>
           <View style={styles.cardHeader}>
             <View style={[styles.iconWrap, { backgroundColor: config.bgColor }]}>
-              <Icon name={config.icon} size={20} color={config.color} />
+              <MaterialIcons  name={config.icon} size={20} color={config.color} />
             </View>
 
             <View style={{ flex: 1, marginHorizontal: 10 }}>
@@ -200,7 +200,7 @@ const formatItem = (item) => {
         }
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
-            <Icon name="history" size={70} color={THEME.gray} />
+            <MaterialIcons  name="history" size={70} color={THEME.gray} />
             <Text style={styles.emptyTitle}>{t('no_activity')}</Text>
             <Text style={styles.emptyText}>{t('activities_here')}</Text>
           </View>

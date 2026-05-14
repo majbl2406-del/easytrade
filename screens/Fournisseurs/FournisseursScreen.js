@@ -3,7 +3,7 @@ import {
   View, Text, StyleSheet, FlatList, TouchableOpacity,
   TextInput, Image, RefreshControl,
 } from 'react-native';
-import Icon from 'react-native-vector-icons/MaterialIcons';
+import { MaterialIcons } from '@expo/vector-icons';
 import { THEME } from '../../theme';
 import api from '../../services/api';
 import ScreenTransition from '../../components/ScreenTransition';
@@ -76,7 +76,9 @@ export default function FournisseursScreen({ navigation }) {
       {/* Badge promotion */}
       {item.promotions && (
         <View style={styles.promoBadge}>
-          <Icon name="local-offer" size={12} color="#fff" />
+          <MaterialIcons 
+
+name="local-offer" size={12} color="#fff" />
           <Text style={styles.promoBadgeText}>{t('promotions')}</Text>
         </View>
       )}
@@ -88,7 +90,9 @@ export default function FournisseursScreen({ navigation }) {
             <Image source={{ uri: item.logo }} style={styles.avatar} />
           ) : (
             <View style={styles.avatarPlaceholder}>
-              <Icon name="person" size={34} color="#fff" />
+              <MaterialIcons 
+
+name="person" size={34} color="#fff" />
             </View>
           )}
         </View>
@@ -99,7 +103,7 @@ export default function FournisseursScreen({ navigation }) {
           {/* Étoiles */}
           <View style={[styles.starsRow, isRTL && { flexDirection: 'row-reverse' }]}>
             {[1, 2, 3, 4, 5].map(i => (
-              <Icon
+              <MaterialIcons 
                 key={i}
                 name="star"
                 size={14}
@@ -110,7 +114,7 @@ export default function FournisseursScreen({ navigation }) {
           </View>
         </View>
 
-        <Icon
+        <MaterialIcons 
           name={isRTL ? 'chevron-left' : 'chevron-right'}
           size={26}
           color="#A0784A"
@@ -122,21 +126,27 @@ export default function FournisseursScreen({ navigation }) {
 
         {/* Nombre de produits */}
         <View style={styles.infoBox}>
-          <Icon name="inventory" size={18} color="#5C3D1E" />
+          <MaterialIcons 
+
+name="inventory" size={18} color="#5C3D1E" />
           <Text style={styles.infoValue}>{item.nombreProduits || 0}</Text>
           <Text style={styles.infoLabel}>{t('products')}</Text>
         </View>
 
         {/* Prix moyen */}
         <View style={styles.infoBox}>
-          <Icon name="attach-money" size={18} color="#5C3D1E" />
+          <MaterialIcons 
+
+name="attach-money" size={18} color="#5C3D1E" />
           <Text style={styles.infoValue}>{item.prixMoyen ? `${item.prixMoyen} DH` : '-'}</Text>
           <Text style={styles.infoLabel}>{t('avg_price')}</Text>
         </View>
 
         {/* Livraison */}
         <View style={styles.infoBox}>
-          <Icon name="local-shipping" size={18} color="#5C3D1E" />
+          <MaterialIcons 
+
+name="local-shipping" size={18} color="#5C3D1E" />
           <Text style={styles.infoValue}>{item.delaiLivraison || '24h'}</Text>
           <Text style={styles.infoLabel}>{t('delivery')}</Text>
         </View>
@@ -149,7 +159,9 @@ export default function FournisseursScreen({ navigation }) {
         onPress={() => navigation.navigate('Produits', { fournisseur: item })}
       >
         <Text style={styles.viewBtnText}>{t('view_products')}</Text>
-        <Icon name="arrow-forward" size={16} color="#5C3D1E" />
+        <MaterialIcons 
+
+name="arrow-forward" size={16} color="#5C3D1E" />
       </TouchableOpacity>
     </TouchableOpacity>
   );
@@ -160,7 +172,9 @@ export default function FournisseursScreen({ navigation }) {
       {/* Barre de recherche */}
       <View style={styles.searchWrap}>
         <View style={[styles.searchBar, isRTL && { flexDirection: 'row-reverse' }]}>
-          <Icon name="search" size={22} color="#A0784A" />
+          <MaterialIcons 
+
+name="search" size={22} color="#A0784A" />
           <TextInput
             style={[styles.searchInput, isRTL && { textAlign: 'right' }]}
             placeholder={t('search_supplier')}
@@ -170,7 +184,9 @@ export default function FournisseursScreen({ navigation }) {
           />
           {searchQuery.length > 0 && (
             <TouchableOpacity onPress={() => setSearchQuery('')}>
-              <Icon name="close" size={20} color="#A0784A" />
+              <MaterialIcons 
+
+name="close" size={20} color="#A0784A" />
             </TouchableOpacity>
           )}
         </View>
@@ -200,7 +216,9 @@ export default function FournisseursScreen({ navigation }) {
         }
         ListEmptyComponent={
           <View style={styles.empty}>
-            <Icon name="person-search" size={72} color="#DDD0BA" />
+            <MaterialIcons 
+
+name="person-search" size={72} color="#DDD0BA" />
             <Text style={styles.emptyText}>
               {searchQuery ? t('no_supplier_found') : t('no_supplier')}
             </Text>

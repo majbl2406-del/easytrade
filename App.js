@@ -4,8 +4,7 @@ import { createStackNavigator, TransitionPresets } from '@react-navigation/stack
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ActivityIndicator, View } from 'react-native';
-import Icon from 'react-native-vector-icons/MaterialIcons';
-
+import { MaterialIcons } from '@expo/vector-icons';
 
 // i18n
 import { LanguageProvider, useLanguage } from './i18n/LanguageContext';
@@ -45,7 +44,7 @@ function MainTabs({ onLogout }) {
             Formations:   'school',
             Profil:       'person',
           };
-          return <Icon name={icons[route.name]} size={size} color={color} />;
+return <MaterialIcons name={icons[route.name]} size={size} color={color} />;
         },
         tabBarActiveTintColor:   THEME.accent,
         tabBarInactiveTintColor: THEME.gray,

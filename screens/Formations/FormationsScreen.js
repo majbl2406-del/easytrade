@@ -4,7 +4,7 @@ import {
   Dimensions, Alert,
 } from 'react-native';
 import YoutubePlayer from 'react-native-youtube-iframe';
-import Icon from 'react-native-vector-icons/MaterialIcons';
+import { MaterialIcons } from '@expo/vector-icons';
 import { THEME } from '../../theme';
 import api from '../../services/api';
 import { useLanguage } from '../../i18n/LanguageContext';
@@ -122,16 +122,16 @@ export default function FormationsScreen() {
         {/* Meta */}
         <View style={[styles.metaRow, isRTL && { flexDirection: 'row-reverse' }]}>
           <View style={styles.metaItem}>
-            <Icon name="access-time" size={15} color={THEME.gray} />
+            <MaterialIcons  name="access-time" size={15} color={THEME.gray} />
             <Text style={styles.metaText}>{item.duree}</Text>
           </View>
           <View style={styles.metaItem}>
-            <Icon name="signal-cellular-alt" size={15} color={THEME.gray} />
+            <MaterialIcons  name="signal-cellular-alt" size={15} color={THEME.gray} />
             <Text style={styles.metaText}>{item.niveau}</Text>
           </View>
           {isCompleted && (
             <View style={styles.metaItem}>
-              <Icon name="check-circle" size={15} color="#4CAF50" />
+              <MaterialIcons  name="check-circle" size={15} color="#4CAF50" />
               <Text style={[styles.metaText, { color: '#4CAF50' }]}>Terminée</Text>
             </View>
           )}
@@ -179,7 +179,7 @@ export default function FormationsScreen() {
 
       {videos.length === 0 ? (
         <View style={styles.centered}>
-          <Icon name="school" size={48} color={THEME.gray} />
+          <MaterialIcons  name="school" size={48} color={THEME.gray} />
           <Text style={{ color: THEME.gray, marginTop: 10 }}>
             Aucune formation disponible
           </Text>
