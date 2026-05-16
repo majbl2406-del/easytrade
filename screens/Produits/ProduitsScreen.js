@@ -4,7 +4,7 @@ import {
   TextInput, Image, Alert, Modal, ActivityIndicator, RefreshControl, ScrollView,
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
-import { THEME } from '../../theme';
+import { useTheme } from '../../ThemeContext';
 import api from '../../services/api';
 import ScreenTransition from '../../components/ScreenTransition';
 import { useLanguage } from '../../i18n/LanguageContext';
@@ -12,6 +12,7 @@ import { useLanguage } from '../../i18n/LanguageContext';
 export default function ProduitsScreen({ route, navigation }) {
   const { fournisseur } = route.params;
   const { t, isRTL } = useLanguage();
+  const { THEME, isDark } = useTheme();
 
   const [produits, setProduits] = useState([]);
   const [filteredProduits, setFilteredProduits] = useState([]);
@@ -27,12 +28,11 @@ export default function ProduitsScreen({ route, navigation }) {
   const [refreshing, setRefreshing] = useState(false);
   const [correctedQuery, setCorrectedQuery] = useState('');
 
-  // --- État du modal de confirmation commande ---
   const [confirmModalVisible, setConfirmModalVisible] = useState(false);
   const [codePromo, setCodePromo] = useState('');
   const [codePromoLoading, setCodePromoLoading] = useState(false);
-  const [codePromoValide, setCodePromoValide] = useState(null); // null | true | false
-  const [reductionInfo, setReductionInfo] = useState(null);     // { nom, reduction }
+  const [codePromoValide, setCodePromoValide] = useState(null);
+  const [reductionInfo, setReductionInfo] = useState(null);
   const [commandeLoading, setCommandeLoading] = useState(false);
 
   useEffect(() => { loadProduits(); }, []);
@@ -61,11 +61,9 @@ export default function ProduitsScreen({ route, navigation }) {
 
   const filterAndSortProduits = async () => {
     let filtered = [...produits];
-
     if (selectedCategory !== 'all') {
       filtered = filtered.filter(p => p.categorie === selectedCategory);
     }
-
     if (searchQuery.trim()) {
       try {
         const response = await api.post('/produits/search', {
@@ -88,7 +86,6 @@ export default function ProduitsScreen({ route, navigation }) {
     } else {
       setCorrectedQuery('');
     }
-
     filtered.sort((a, b) => {
       switch (sortBy) {
         case 'prix':       return a.prix - b.prix;
@@ -96,7 +93,6 @@ export default function ProduitsScreen({ route, navigation }) {
         default:           return a.nom.localeCompare(b.nom);
       }
     });
-
     setFilteredProduits(filtered);
   };
 
@@ -114,18 +110,15 @@ export default function ProduitsScreen({ route, navigation }) {
     Alert.alert(t('success'), t('product_added_cart'));
   };
 
-  // Calcul du montant total du panier
   const getMontantTotal = () =>
     panier.reduce((sum, item) => sum + item.prix * item.quantite, 0);
 
-  // Calcul montant après réduction
   const getMontantApresReduction = () => {
     const total = getMontantTotal();
     if (!reductionInfo) return total;
     return Math.max(0, total - reductionInfo.reduction);
   };
 
-  // Vérifier le code promo
   const verifierCodePromo = async () => {
     if (!codePromo.trim()) return;
     setCodePromoLoading(true);
@@ -150,7 +143,6 @@ export default function ProduitsScreen({ route, navigation }) {
     }
   };
 
-  // Réinitialiser le code promo quand on ferme le modal
   const fermerConfirmModal = () => {
     setConfirmModalVisible(false);
     setCodePromo('');
@@ -158,7 +150,6 @@ export default function ProduitsScreen({ route, navigation }) {
     setReductionInfo(null);
   };
 
-  // Passer la commande
   const passerCommande = async () => {
     if (panier.length === 0) {
       Alert.alert(t('error'), t('cart_empty'));
@@ -195,6 +186,8 @@ export default function ProduitsScreen({ route, navigation }) {
     return t('sort_name');
   };
 
+  const styles = makeStyles(THEME, isDark);
+
   const renderProduct = ({ item }) => (
     <TouchableOpacity
       style={styles.productCard}
@@ -205,7 +198,7 @@ export default function ProduitsScreen({ route, navigation }) {
         <Image source={{ uri: item.image }} style={styles.productImage} />
       ) : (
         <View style={styles.imagePlaceholder}>
-          <MaterialIcons  name="inventory" size={40} color={THEME.gray} />
+          <MaterialIcons name="inventory" size={40} color={THEME.gray} />
         </View>
       )}
 
@@ -235,12 +228,11 @@ export default function ProduitsScreen({ route, navigation }) {
         style={styles.addButton}
         onPress={() => { setSelectedProduct(item); setModalVisible(true); }}
       >
-        <MaterialIcons  name="add-shopping-cart" size={24} color={THEME.white} />
+        <MaterialIcons name="add-shopping-cart" size={24} color="#fff" />
       </TouchableOpacity>
     </TouchableOpacity>
   );
 
-  // ── Modal confirmation commande ──────────────────────────────────────────
   const renderConfirmModal = () => (
     <Modal
       animationType="slide"
@@ -251,16 +243,13 @@ export default function ProduitsScreen({ route, navigation }) {
       <View style={styles.modalOverlay}>
         <View style={styles.confirmModalContent}>
           <ScrollView showsVerticalScrollIndicator={false}>
-
-            {/* Titre */}
             <View style={styles.confirmHeader}>
               <Text style={styles.confirmTitle}>🛒 Récapitulatif de commande</Text>
               <TouchableOpacity onPress={fermerConfirmModal}>
-                <MaterialIcons  name="close" size={26} color={THEME.gray} />
+                <MaterialIcons name="close" size={26} color={THEME.textSecondary} />
               </TouchableOpacity>
             </View>
 
-            {/* Liste produits du panier */}
             {panier.map((item, index) => (
               <View key={index} style={styles.panierItem}>
                 <Text style={styles.panierItemNom} numberOfLines={1}>{item.nom}</Text>
@@ -271,13 +260,11 @@ export default function ProduitsScreen({ route, navigation }) {
 
             <View style={styles.separateur} />
 
-            {/* Montant total */}
             <View style={styles.montantRow}>
               <Text style={styles.montantLabel}>Sous-total</Text>
               <Text style={styles.montantValeur}>{getMontantTotal()} DH</Text>
             </View>
 
-            {/* Section code promo */}
             <View style={styles.codePromoSection}>
               <Text style={styles.codePromoTitle}>🎁 Code de réduction</Text>
               <View style={styles.codePromoRow}>
@@ -303,16 +290,15 @@ export default function ProduitsScreen({ route, navigation }) {
                   disabled={!codePromo.trim() || codePromoLoading}
                 >
                   {codePromoLoading
-                    ? <ActivityIndicator size="small" color={THEME.white} />
+                    ? <ActivityIndicator size="small" color="#fff" />
                     : <Text style={styles.verifierButtonText}>Vérifier</Text>
                   }
                 </TouchableOpacity>
               </View>
 
-              {/* Feedback code promo */}
               {codePromoValide === true && reductionInfo && (
                 <View style={styles.codePromoFeedbackValide}>
-                  <MaterialIcons  name="check-circle" size={18} color="#4CAF50" />
+                  <MaterialIcons name="check-circle" size={18} color="#4CAF50" />
                   <Text style={styles.codePromoFeedbackTexteValide}>
                     {reductionInfo.nom} — -{reductionInfo.reduction} DH
                   </Text>
@@ -320,7 +306,7 @@ export default function ProduitsScreen({ route, navigation }) {
               )}
               {codePromoValide === false && (
                 <View style={styles.codePromoFeedbackInvalide}>
-                  <MaterialIcons  name="cancel" size={18} color={THEME.error} />
+                  <MaterialIcons name="cancel" size={18} color={THEME.error} />
                   <Text style={styles.codePromoFeedbackTexteInvalide}>
                     Code invalide ou déjà utilisé
                   </Text>
@@ -328,7 +314,6 @@ export default function ProduitsScreen({ route, navigation }) {
               )}
             </View>
 
-            {/* Montant final */}
             {reductionInfo && reductionInfo.reduction > 0 && (
               <View style={styles.montantRow}>
                 <Text style={styles.reductionLabel}>Réduction</Text>
@@ -341,7 +326,6 @@ export default function ProduitsScreen({ route, navigation }) {
               <Text style={styles.montantFinalValeur}>{getMontantApresReduction()} DH</Text>
             </View>
 
-            {/* Boutons */}
             <View style={styles.confirmButtons}>
               <TouchableOpacity style={styles.annulerButton} onPress={fermerConfirmModal}>
                 <Text style={styles.annulerButtonText}>Annuler</Text>
@@ -352,12 +336,11 @@ export default function ProduitsScreen({ route, navigation }) {
                 disabled={commandeLoading}
               >
                 {commandeLoading
-                  ? <ActivityIndicator color={THEME.white} />
+                  ? <ActivityIndicator color="#fff" />
                   : <Text style={styles.confirmerButtonText}>✅ Confirmer</Text>
                 }
               </TouchableOpacity>
             </View>
-
           </ScrollView>
         </View>
       </View>
@@ -366,7 +349,6 @@ export default function ProduitsScreen({ route, navigation }) {
 
   return (
     <ScreenTransition style={styles.container}>
-      {/* En-tête */}
       <View style={styles.header}>
         <Text style={[styles.fournisseurName, isRTL && { textAlign: 'right' }]}>
           {fournisseur.nom}
@@ -376,10 +358,9 @@ export default function ProduitsScreen({ route, navigation }) {
         </Text>
       </View>
 
-      {/* Recherche et filtres */}
       <View style={styles.searchContainer}>
         <View style={[styles.searchBar, isRTL && { flexDirection: 'row-reverse' }]}>
-          <MaterialIcons  name="search" size={20} color={THEME.gray} />
+          <MaterialIcons name="search" size={20} color={THEME.textSecondary} />
           <TextInput
             style={[styles.searchInput, isRTL && { textAlign: 'right' }]}
             placeholder={t('search_product')}
@@ -387,7 +368,7 @@ export default function ProduitsScreen({ route, navigation }) {
             onChangeText={setSearchQuery}
             placeholderTextColor={THEME.gray}
           />
-          <MaterialIcons  name="psychology" size={20} color={THEME.accent} />
+          <MaterialIcons name="psychology" size={20} color={THEME.accent} />
         </View>
 
         {searchQuery.trim() && correctedQuery && correctedQuery !== searchQuery.toLowerCase() && (
@@ -396,7 +377,6 @@ export default function ProduitsScreen({ route, navigation }) {
           </Text>
         )}
 
-        {/* Catégories */}
         <FlatList
           horizontal
           inverted={isRTL}
@@ -416,7 +396,6 @@ export default function ProduitsScreen({ route, navigation }) {
           contentContainerStyle={styles.categoriesList}
         />
 
-        {/* Tri */}
         <View style={[styles.sortContainer, isRTL && { flexDirection: 'row-reverse' }]}>
           <Text style={styles.sortLabel}>{t('sort_by')} :</Text>
           <TouchableOpacity
@@ -428,12 +407,11 @@ export default function ProduitsScreen({ route, navigation }) {
             }}
           >
             <Text style={styles.sortButtonText}>{getSortLabel()}</Text>
-            <MaterialIcons  name="sort" size={18} color={THEME.primary} />
+            <MaterialIcons name="sort" size={18} color={THEME.primary} />
           </TouchableOpacity>
         </View>
       </View>
 
-      {/* Liste des produits */}
       <FlatList
         data={filteredProduits}
         renderItem={renderProduct}
@@ -452,20 +430,19 @@ export default function ProduitsScreen({ route, navigation }) {
             </View>
           ) : (
             <View style={styles.emptyContainer}>
-              <MaterialIcons  name="inventory" size={60} color={THEME.gray} />
+              <MaterialIcons name="inventory" size={60} color={THEME.gray} />
               <Text style={styles.emptyText}>{t('no_product_found')}</Text>
             </View>
           )
         }
       />
 
-      {/* Bouton panier flottant → ouvre le modal de confirmation */}
       {panier.length > 0 && (
         <TouchableOpacity
           style={styles.panierButton}
           onPress={() => setConfirmModalVisible(true)}
         >
-          <MaterialIcons  name="shopping-cart" size={24} color={THEME.white} />
+          <MaterialIcons name="shopping-cart" size={24} color="#fff" />
           <View style={styles.panierBadge}>
             <Text style={styles.panierBadgeText}>{panier.length}</Text>
           </View>
@@ -475,7 +452,6 @@ export default function ProduitsScreen({ route, navigation }) {
         </TouchableOpacity>
       )}
 
-      {/* Modal ajout produit au panier */}
       <Modal animationType="slide" transparent visible={modalVisible} onRequestClose={() => setModalVisible(false)}>
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
@@ -492,11 +468,11 @@ export default function ProduitsScreen({ route, navigation }) {
                   </Text>
                   <View style={styles.quantityControls}>
                     <TouchableOpacity style={styles.quantityButton} onPress={() => setQuantity(Math.max(1, quantity - 1))}>
-                      <MaterialIcons  name="remove" size={24} color={THEME.white} />
+                      <MaterialIcons name="remove" size={24} color="#fff" />
                     </TouchableOpacity>
                     <Text style={styles.quantityText}>{quantity}</Text>
                     <TouchableOpacity style={styles.quantityButton} onPress={() => setQuantity(quantity + 1)}>
-                      <MaterialIcons  name="add" size={24} color={THEME.white} />
+                      <MaterialIcons name="add" size={24} color="#fff" />
                     </TouchableOpacity>
                   </View>
                 </View>
@@ -525,99 +501,98 @@ export default function ProduitsScreen({ route, navigation }) {
         </View>
       </Modal>
 
-      {/* Modal confirmation commande */}
       {renderConfirmModal()}
     </ScreenTransition>
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (THEME, isDark) => StyleSheet.create({
   container:          { flex: 1, backgroundColor: THEME.background },
   header:             { backgroundColor: THEME.primary, padding: 20, paddingTop: 15, elevation: 4 },
-  fournisseurName:    { fontSize: 22, fontWeight: 'bold', color: THEME.white },
-  subtitle:           { fontSize: 14, color: THEME.lightBeige, marginTop: 5 },
-  searchContainer:    { backgroundColor: THEME.white, padding: 15 },
-  searchBar:          { flexDirection: 'row', alignItems: 'center', backgroundColor: THEME.lightBeige, borderRadius: 10, paddingHorizontal: 15, height: 45, gap: 10 },
-  searchInput:        { flex: 1, fontSize: 14, color: THEME.black },
-  correctedText:      { marginTop: 8, fontSize: 12, color: THEME.secondary, fontStyle: 'italic' },
+  fournisseurName:    { fontSize: 22, fontWeight: 'bold', color: '#fff' },
+  subtitle:           { fontSize: 14, color: isDark ? 'rgba(255,255,255,0.7)' : 'rgba(255,255,255,0.85)', marginTop: 5 },
+  searchContainer:    { backgroundColor: THEME.surface, padding: 15, borderBottomWidth: 1, borderBottomColor: THEME.border },
+  searchBar:          { flexDirection: 'row', alignItems: 'center', backgroundColor: THEME.inputBg, borderRadius: 10, paddingHorizontal: 15, height: 45, gap: 10, borderWidth: 1, borderColor: THEME.border },
+  searchInput:        { flex: 1, fontSize: 14, color: THEME.text },
+  correctedText:      { marginTop: 8, fontSize: 12, color: THEME.accent, fontStyle: 'italic' },
   categoriesList:     { paddingVertical: 10 },
-  categoryChip:       { backgroundColor: THEME.lightBeige, paddingHorizontal: 16, paddingVertical: 8, borderRadius: 20, marginRight: 10 },
-  categoryChipActive: { backgroundColor: THEME.primary },
-  categoryText:       { fontSize: 14, color: THEME.secondary, fontWeight: '600' },
-  categoryTextActive: { color: THEME.white },
+  categoryChip:       { backgroundColor: THEME.inputBg, paddingHorizontal: 16, paddingVertical: 8, borderRadius: 20, marginRight: 10, borderWidth: 1, borderColor: THEME.border },
+  categoryChipActive: { backgroundColor: THEME.primary, borderColor: THEME.primary },
+  categoryText:       { fontSize: 14, color: THEME.textSecondary, fontWeight: '600' },
+  categoryTextActive: { color: '#fff' },
   sortContainer:      { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 10 },
-  sortLabel:          { fontSize: 14, color: THEME.gray },
+  sortLabel:          { fontSize: 14, color: THEME.textSecondary },
   sortButton:         { flexDirection: 'row', alignItems: 'center', gap: 5 },
   sortButtonText:     { fontSize: 14, color: THEME.primary, fontWeight: '600' },
   productsList:       { padding: 10, paddingBottom: 100 },
-  productCard:        { flex: 1, backgroundColor: THEME.white, borderRadius: 12, margin: 5, overflow: 'hidden', elevation: 4 },
+  productCard:        { flex: 1, backgroundColor: THEME.card, borderRadius: 12, margin: 5, overflow: 'hidden', elevation: 4, borderWidth: 1, borderColor: THEME.border },
   productImage:       { width: '100%', height: 120 },
-  imagePlaceholder:   { width: '100%', height: 120, backgroundColor: THEME.lightBeige, justifyContent: 'center', alignItems: 'center' },
+  imagePlaceholder:   { width: '100%', height: 120, backgroundColor: THEME.inputBg, justifyContent: 'center', alignItems: 'center' },
   productInfo:        { padding: 10 },
-  productName:        { fontSize: 14, fontWeight: 'bold', color: THEME.darkBrown, marginBottom: 5 },
-  productDescription: { fontSize: 11, color: THEME.gray, marginBottom: 8 },
+  productName:        { fontSize: 14, fontWeight: 'bold', color: THEME.text, marginBottom: 5 },
+  productDescription: { fontSize: 11, color: THEME.textSecondary, marginBottom: 8 },
   productFooter:      { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   productPrice:       { fontSize: 16, fontWeight: 'bold', color: THEME.primary },
-  stockWarning:       { backgroundColor: THEME.warning, paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4 },
-  stockWarningText:   { fontSize: 9, color: THEME.white, fontWeight: 'bold' },
+  stockWarning:       { backgroundColor: THEME.warning || '#FF9800', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4 },
+  stockWarningText:   { fontSize: 9, color: '#fff', fontWeight: 'bold' },
   promotionTag:       { position: 'absolute', top: 10, right: 10, backgroundColor: THEME.error, paddingHorizontal: 8, paddingVertical: 4, borderRadius: 6 },
-  promotionText:      { color: THEME.white, fontSize: 12, fontWeight: 'bold' },
+  promotionText:      { color: '#fff', fontSize: 12, fontWeight: 'bold' },
   addButton:          { backgroundColor: THEME.primary, padding: 10, alignItems: 'center' },
   panierButton:       { position: 'absolute', bottom: 20, right: 20, left: 20, backgroundColor: THEME.primary, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', padding: 15, borderRadius: 25, gap: 10, elevation: 6 },
   panierBadge:        { position: 'absolute', top: -5, right: 20, backgroundColor: THEME.accent, width: 24, height: 24, borderRadius: 12, justifyContent: 'center', alignItems: 'center' },
-  panierBadgeText:    { color: THEME.white, fontSize: 12, fontWeight: 'bold' },
-  panierButtonText:   { color: THEME.white, fontSize: 18, fontWeight: 'bold' },
+  panierBadgeText:    { color: '#fff', fontSize: 12, fontWeight: 'bold' },
+  panierButtonText:   { color: '#fff', fontSize: 18, fontWeight: 'bold' },
   emptyContainer:     { alignItems: 'center', paddingVertical: 60 },
-  emptyText:          { fontSize: 16, color: THEME.gray, marginTop: 15 },
-  modalOverlay:       { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center' },
-  modalContent:       { backgroundColor: THEME.white, borderRadius: 20, padding: 25, width: '85%' },
-  modalTitle:         { fontSize: 20, fontWeight: 'bold', color: THEME.darkBrown, marginBottom: 10 },
+  emptyText:          { fontSize: 16, color: THEME.textSecondary, marginTop: 15 },
+  modalOverlay:       { flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'center', alignItems: 'center' },
+  modalContent:       { backgroundColor: THEME.card, borderRadius: 20, padding: 25, width: '85%', borderWidth: 1, borderColor: THEME.border },
+  modalTitle:         { fontSize: 20, fontWeight: 'bold', color: THEME.text, marginBottom: 10 },
   modalPrice:         { fontSize: 24, fontWeight: 'bold', color: THEME.primary, marginBottom: 20 },
   quantityContainer:  { marginBottom: 20 },
-  quantityLabel:      { fontSize: 16, color: THEME.gray, marginBottom: 10 },
+  quantityLabel:      { fontSize: 16, color: THEME.textSecondary, marginBottom: 10 },
   quantityControls:   { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 20 },
   quantityButton:     { backgroundColor: THEME.primary, width: 40, height: 40, borderRadius: 20, justifyContent: 'center', alignItems: 'center' },
-  quantityText:       { fontSize: 24, fontWeight: 'bold', color: THEME.darkBrown, minWidth: 40, textAlign: 'center' },
-  totalText:          { fontSize: 18, fontWeight: 'bold', color: THEME.secondary, textAlign: 'center', marginBottom: 20 },
+  quantityText:       { fontSize: 24, fontWeight: 'bold', color: THEME.text, minWidth: 40, textAlign: 'center' },
+  totalText:          { fontSize: 18, fontWeight: 'bold', color: THEME.textSecondary, textAlign: 'center', marginBottom: 20 },
   modalButtons:       { flexDirection: 'row', gap: 10 },
   modalButton:        { flex: 1, padding: 12, borderRadius: 10, alignItems: 'center' },
-  cancelButton:       { backgroundColor: THEME.lightBeige },
+  cancelButton:       { backgroundColor: THEME.inputBg, borderWidth: 1, borderColor: THEME.border },
   confirmButton:      { backgroundColor: THEME.primary },
-  cancelButtonText:   { color: THEME.secondary, fontSize: 16, fontWeight: 'bold' },
-  confirmButtonText:  { color: THEME.white, fontSize: 16, fontWeight: 'bold' },
+  cancelButtonText:   { color: THEME.textSecondary, fontSize: 16, fontWeight: 'bold' },
+  confirmButtonText:  { color: '#fff', fontSize: 16, fontWeight: 'bold' },
 
   // ── Confirm modal ──
-  confirmModalContent:      { backgroundColor: THEME.white, borderRadius: 20, padding: 20, width: '92%', maxHeight: '85%' },
-  confirmHeader:            { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 15 },
-  confirmTitle:             { fontSize: 18, fontWeight: 'bold', color: THEME.darkBrown },
-  panierItem:               { flexDirection: 'row', alignItems: 'center', paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: THEME.lightBeige },
-  panierItemNom:            { flex: 1, fontSize: 13, color: THEME.darkBrown },
-  panierItemQty:            { fontSize: 13, color: THEME.gray, marginHorizontal: 10 },
-  panierItemPrix:           { fontSize: 13, fontWeight: 'bold', color: THEME.primary },
-  separateur:               { height: 1, backgroundColor: THEME.lightBeige, marginVertical: 12 },
-  montantRow:               { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 },
-  montantLabel:             { fontSize: 14, color: THEME.gray },
-  montantValeur:            { fontSize: 14, fontWeight: '600', color: THEME.darkBrown },
-  reductionLabel:           { fontSize: 14, color: '#4CAF50' },
-  reductionValeur:          { fontSize: 14, fontWeight: 'bold', color: '#4CAF50' },
-  montantFinalRow:          { borderTopWidth: 1, borderTopColor: THEME.lightBeige, paddingTop: 10, marginTop: 4 },
-  montantFinalLabel:        { fontSize: 16, fontWeight: 'bold', color: THEME.darkBrown },
-  montantFinalValeur:       { fontSize: 18, fontWeight: 'bold', color: THEME.primary },
-  codePromoSection:         { backgroundColor: THEME.lightBeige, borderRadius: 12, padding: 14, marginVertical: 12 },
-  codePromoTitle:           { fontSize: 14, fontWeight: 'bold', color: THEME.darkBrown, marginBottom: 10 },
-  codePromoRow:             { flexDirection: 'row', gap: 8 },
-  codePromoInput:           { flex: 1, backgroundColor: THEME.white, borderRadius: 8, paddingHorizontal: 12, height: 44, fontSize: 14, color: THEME.darkBrown, borderWidth: 1, borderColor: THEME.gray },
-  codePromoInputValide:     { borderColor: '#4CAF50' },
-  codePromoInputInvalide:   { borderColor: THEME.error },
-  verifierButton:           { backgroundColor: THEME.primary, paddingHorizontal: 14, borderRadius: 8, justifyContent: 'center', height: 44 },
-  verifierButtonText:       { color: THEME.white, fontWeight: 'bold', fontSize: 13 },
-  codePromoFeedbackValide:  { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 8 },
+  confirmModalContent:            { backgroundColor: THEME.card, borderRadius: 20, padding: 20, width: '92%', maxHeight: '85%', borderWidth: 1, borderColor: THEME.border },
+  confirmHeader:                  { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 15 },
+  confirmTitle:                   { fontSize: 18, fontWeight: 'bold', color: THEME.text },
+  panierItem:                     { flexDirection: 'row', alignItems: 'center', paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: THEME.border },
+  panierItemNom:                  { flex: 1, fontSize: 13, color: THEME.text },
+  panierItemQty:                  { fontSize: 13, color: THEME.textSecondary, marginHorizontal: 10 },
+  panierItemPrix:                 { fontSize: 13, fontWeight: 'bold', color: THEME.primary },
+  separateur:                     { height: 1, backgroundColor: THEME.border, marginVertical: 12 },
+  montantRow:                     { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 },
+  montantLabel:                   { fontSize: 14, color: THEME.textSecondary },
+  montantValeur:                  { fontSize: 14, fontWeight: '600', color: THEME.text },
+  reductionLabel:                 { fontSize: 14, color: '#4CAF50' },
+  reductionValeur:                { fontSize: 14, fontWeight: 'bold', color: '#4CAF50' },
+  montantFinalRow:                { borderTopWidth: 1, borderTopColor: THEME.border, paddingTop: 10, marginTop: 4 },
+  montantFinalLabel:              { fontSize: 16, fontWeight: 'bold', color: THEME.text },
+  montantFinalValeur:             { fontSize: 18, fontWeight: 'bold', color: THEME.primary },
+  codePromoSection:               { backgroundColor: THEME.inputBg, borderRadius: 12, padding: 14, marginVertical: 12, borderWidth: 1, borderColor: THEME.border },
+  codePromoTitle:                 { fontSize: 14, fontWeight: 'bold', color: THEME.text, marginBottom: 10 },
+  codePromoRow:                   { flexDirection: 'row', gap: 8 },
+  codePromoInput:                 { flex: 1, backgroundColor: THEME.surface, borderRadius: 8, paddingHorizontal: 12, height: 44, fontSize: 14, color: THEME.text, borderWidth: 1, borderColor: THEME.border },
+  codePromoInputValide:           { borderColor: '#4CAF50' },
+  codePromoInputInvalide:         { borderColor: THEME.error },
+  verifierButton:                 { backgroundColor: THEME.primary, paddingHorizontal: 14, borderRadius: 8, justifyContent: 'center', height: 44 },
+  verifierButtonText:             { color: '#fff', fontWeight: 'bold', fontSize: 13 },
+  codePromoFeedbackValide:        { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 8 },
   codePromoFeedbackTexteValide:   { fontSize: 13, color: '#4CAF50', fontWeight: '600' },
   codePromoFeedbackInvalide:      { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 8 },
   codePromoFeedbackTexteInvalide: { fontSize: 13, color: THEME.error },
-  confirmButtons:           { flexDirection: 'row', gap: 10, marginTop: 16 },
-  annulerButton:            { flex: 1, padding: 13, borderRadius: 10, backgroundColor: THEME.lightBeige, alignItems: 'center' },
-  annulerButtonText:        { color: THEME.secondary, fontSize: 15, fontWeight: 'bold' },
-  confirmerButton:          { flex: 1, padding: 13, borderRadius: 10, backgroundColor: THEME.primary, alignItems: 'center' },
-  confirmerButtonText:      { color: THEME.white, fontSize: 15, fontWeight: 'bold' },
+  confirmButtons:                 { flexDirection: 'row', gap: 10, marginTop: 16 },
+  annulerButton:                  { flex: 1, padding: 13, borderRadius: 10, backgroundColor: THEME.inputBg, alignItems: 'center', borderWidth: 1, borderColor: THEME.border },
+  annulerButtonText:              { color: THEME.textSecondary, fontSize: 15, fontWeight: 'bold' },
+  confirmerButton:                { flex: 1, padding: 13, borderRadius: 10, backgroundColor: THEME.primary, alignItems: 'center' },
+  confirmerButtonText:            { color: '#fff', fontSize: 15, fontWeight: 'bold' },
 });

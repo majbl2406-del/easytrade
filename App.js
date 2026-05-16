@@ -11,6 +11,10 @@ import { LanguageProvider, useLanguage } from './i18n/LanguageContext';
 import { I18nManager } from 'react-native';
 I18nManager.forceRTL(false);
 I18nManager.allowRTL(false);
+
+// Theme
+import { ThemeProvider, useTheme } from './ThemeContext';
+
 // Import des écrans
 import LoginScreen from './screens/Auth/LoginScreen';
 import RegisterScreen from './screens/Auth/RegisterScreen';
@@ -24,14 +28,14 @@ import FormationsScreen from './screens/Formations/FormationsScreen';
 import ProfileScreen from './screens/Profile/ProfileScreen';
 import PointsScreen from './screens/Points/PointsScreen';
 import HistoriqueScreen from './screens/HistoriqueScreen';
-import FormationDetailScreen from './screens/FormationDetailScreen';
-import { THEME } from './theme';
+
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
 
 function MainTabs({ onLogout }) {
   const { t } = useLanguage();
+  const { THEME } = useTheme();
 
   return (
     <Tab.Navigator
@@ -44,13 +48,13 @@ function MainTabs({ onLogout }) {
             Formations:   'school',
             Profil:       'person',
           };
-return <MaterialIcons name={icons[route.name]} size={size} color={color} />;
+          return <MaterialIcons name={icons[route.name]} size={size} color={color} />;
         },
-        tabBarActiveTintColor:   THEME.accent,
+        tabBarActiveTintColor:   THEME.primary,
         tabBarInactiveTintColor: THEME.gray,
         tabBarHideOnKeyboard:    true,
         tabBarStyle: {
-          backgroundColor: THEME.white,
+          backgroundColor: THEME.surface,
           position: 'absolute',
           left: 14, right: 14, bottom: 10,
           borderTopWidth: 0,
@@ -58,7 +62,7 @@ return <MaterialIcons name={icons[route.name]} size={size} color={color} />;
           height: 66,
           paddingBottom: 8, paddingTop: 8,
           elevation: 12,
-          shadowColor: THEME.darkBrown,
+          shadowColor: THEME.black,
           shadowOffset: { width: 0, height: 6 },
           shadowOpacity: 0.18,
           shadowRadius: 12,
@@ -86,6 +90,7 @@ return <MaterialIcons name={icons[route.name]} size={size} color={color} />;
 
 function AppNavigator() {
   const { t } = useLanguage();
+  const { THEME } = useTheme();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
 
@@ -170,15 +175,10 @@ function AppNavigator() {
               options={{ title: t('screen_points') }}
             />
             <Stack.Screen
-  name="Historique"
-  component={HistoriqueScreen}
-  options={{ title: 'Historique' }}
-/>
-  <Stack.Screen                                      // ← ajouter ici
-            name="FormationDetail"
-            component={FormationDetailScreen}
-            options={{ title: t('screen_formation_detail') }}
-          />
+              name="Historique"
+              component={HistoriqueScreen}
+              options={{ title: 'Historique' }}
+            />
           </>
         )}
       </Stack.Navigator>
@@ -186,10 +186,15 @@ function AppNavigator() {
   );
 }
 
-export default function App() {
+// AppNavigator doit être dans ThemeProvider pour accéder à useTheme()
+function Root() {
   return (
     <LanguageProvider>
-      <AppNavigator />
+      <ThemeProvider>
+        <AppNavigator />
+      </ThemeProvider>
     </LanguageProvider>
   );
 }
+
+export default Root;

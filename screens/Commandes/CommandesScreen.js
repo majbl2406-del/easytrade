@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, RefreshControl, Modal, ActivityIndicator } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
-import { THEME } from '../../theme';
+import { useTheme } from '../../ThemeContext';
 import api from '../../services/api';
 import ScreenTransition from '../../components/ScreenTransition';
-import { useLanguage } from '../../i18n/LanguageContext'; // ← ajouté
+import { useLanguage } from '../../i18n/LanguageContext';
 
 const STATUT_COLORS = {
-  'En attente': THEME.warning, 'Confirmée': '#4169E1',
-  'En préparation': '#FF8C00', 'En livraison': '#9370DB', 'Livrée': THEME.success,
+  'En attente': '#F57C00', 'Confirmée': '#4169E1',
+  'En préparation': '#FF8C00', 'En livraison': '#9370DB', 'Livrée': '#2E7D32',
 };
 const STATUT_ICONS = {
   'En attente': 'schedule', 'Confirmée': 'check-circle',
@@ -16,7 +16,9 @@ const STATUT_ICONS = {
 };
 
 export default function CommandesScreen() {
-  const { t, isRTL } = useLanguage(); // ← ajouté
+  const { t, isRTL } = useLanguage();
+  const { THEME, isDark } = useTheme();
+
   const [commandes, setCommandes] = useState([]);
   const [filter, setFilter] = useState('all');
   const [refreshing, setRefreshing] = useState(false);
@@ -24,7 +26,6 @@ export default function CommandesScreen() {
   const [modalVisible, setModalVisible] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  // Les statuts traduits dynamiquement
   const STATUTS_LABELS = {
     'En attente':     t('status_waiting'),
     'Confirmée':      t('status_confirmed'),
@@ -60,6 +61,8 @@ export default function CommandesScreen() {
     { key: 'completed',   label: t('completed') },
   ];
 
+  const styles = makeStyles(THEME, isDark);
+
   const renderCommandeCard = ({ item }) => {
     const currentStep = getStatutStep(item.statut);
     return (
@@ -70,22 +73,22 @@ export default function CommandesScreen() {
             <Text style={styles.commandeDate}>{new Date(item.date).toLocaleDateString('fr-FR')}</Text>
           </View>
           <View style={[styles.statutBadge, { backgroundColor: STATUT_COLORS[item.statut] }]}>
-            <MaterialIcons  name={STATUT_ICONS[item.statut]} size={16} color={THEME.white} />
+            <MaterialIcons name={STATUT_ICONS[item.statut]} size={16} color="#FFFFFF" />
             <Text style={styles.statutText}>{STATUTS_LABELS[item.statut]}</Text>
           </View>
         </View>
 
         <View style={styles.cardContent}>
           <View style={[styles.infoRow, isRTL && { flexDirection: 'row-reverse' }]}>
-            <MaterialIcons  name="store" size={18} color={THEME.gray} />
+            <MaterialIcons name="store" size={18} color={THEME.gray} />
             <Text style={styles.infoText}>{item.fournisseurNom}</Text>
           </View>
           <View style={[styles.infoRow, isRTL && { flexDirection: 'row-reverse' }]}>
-            <MaterialIcons  name="inventory" size={18} color={THEME.gray} />
+            <MaterialIcons name="inventory" size={18} color={THEME.gray} />
             <Text style={styles.infoText}>{item.nombreProduits} {t('products_label').replace(':', '')}</Text>
           </View>
           <View style={[styles.infoRow, isRTL && { flexDirection: 'row-reverse' }]}>
-            <MaterialIcons  name="attach-money" size={18} color={THEME.gray} />
+            <MaterialIcons name="attach-money" size={18} color={THEME.gray} />
             <Text style={styles.totalText}>{item.montantTotal} DH</Text>
           </View>
         </View>
@@ -106,26 +109,27 @@ export default function CommandesScreen() {
     if (!selectedCommande) return null;
     const currentStep = getStatutStep(selectedCommande.statut);
     return (
-      <Modal animationType="slide" transparent={true} visible={modalVisible} onRequestClose={() => setModalVisible(false)}>
+      <Modal animationType="slide" transparent visible={modalVisible} onRequestClose={() => setModalVisible(false)}>
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <View style={[styles.modalHeader, isRTL && { flexDirection: 'row-reverse' }]}>
               <Text style={styles.modalTitle}>{t('order_number')}{selectedCommande.id}</Text>
               <TouchableOpacity onPress={() => setModalVisible(false)}>
-                <MaterialIcons  name="close" size={28} color={THEME.gray} />
+                <MaterialIcons name="close" size={28} color={THEME.gray} />
               </TouchableOpacity>
             </View>
 
-            {/* Suivi */}
             <View style={styles.trackingContainer}>
               {STATUTS_LIST.map((statut, index) => {
                 const isCompleted = index <= currentStep;
-                const isCurrent = index === currentStep;
+                const isCurrent   = index === currentStep;
                 return (
                   <View key={statut} style={[styles.trackingStep, isRTL && { flexDirection: 'row-reverse' }]}>
                     <View style={styles.stepIndicatorContainer}>
                       <View style={[styles.stepIndicator, isCompleted && styles.stepIndicatorCompleted, isCurrent && styles.stepIndicatorCurrent]}>
-                        {isCompleted ? <MaterialIcons  name="check" size={20} color={THEME.white} /> : <Text style={styles.stepNumber}>{index + 1}</Text>}
+                        {isCompleted
+                          ? <MaterialIcons name="check" size={20} color="#FFFFFF" />
+                          : <Text style={styles.stepNumber}>{index + 1}</Text>}
                       </View>
                       {index < STATUTS_LIST.length - 1 && <View style={[styles.stepLine, isCompleted && styles.stepLineCompleted]} />}
                     </View>
@@ -140,12 +144,11 @@ export default function CommandesScreen() {
               })}
             </View>
 
-            {/* Détails */}
             <View style={styles.detailsContainer}>
               <Text style={[styles.detailsTitle, isRTL && { textAlign: 'right' }]}>{t('order_details')}</Text>
               {[
                 [t('supplier_label'), selectedCommande.fournisseurNom],
-                [t('date_label'), new Date(selectedCommande.date).toLocaleDateString('fr-FR')],
+                [t('date_label'),     new Date(selectedCommande.date).toLocaleDateString('fr-FR')],
                 [t('products_label'), selectedCommande.nombreProduits],
               ].map(([label, val]) => (
                 <View key={label} style={[styles.detailRow, isRTL && { flexDirection: 'row-reverse' }]}>
@@ -159,7 +162,6 @@ export default function CommandesScreen() {
               </View>
             </View>
 
-            {/* Produits */}
             <View style={styles.produitsContainer}>
               <Text style={[styles.produitsTitle, isRTL && { textAlign: 'right' }]}>{t('ordered_products')}</Text>
               {selectedCommande.produits?.map((produit, index) => (
@@ -196,7 +198,7 @@ export default function CommandesScreen() {
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.listContainer}
         showsVerticalScrollIndicator={false}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={THEME.primary} colors={[THEME.primary, THEME.secondary]} />}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={THEME.primary} colors={[THEME.primary]} />}
         ListEmptyComponent={
           loading ? (
             <View style={styles.emptyContainer}>
@@ -205,7 +207,7 @@ export default function CommandesScreen() {
             </View>
           ) : (
             <View style={styles.emptyContainer}>
-              <MaterialIcons  name="shopping-cart" size={80} color={THEME.gray} />
+              <MaterialIcons name="shopping-cart" size={80} color={THEME.gray} />
               <Text style={styles.emptyText}>
                 {filter === 'all' ? t('no_orders') : filter === 'in_progress' ? t('no_orders_in_progress') : t('no_orders_completed')}
               </Text>
@@ -218,62 +220,62 @@ export default function CommandesScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: THEME.background },
-  filterContainer: { flexDirection: 'row', padding: 15, backgroundColor: THEME.white, gap: 10, elevation: 2 },
-  filterButton: { flex: 1, paddingVertical: 10, paddingHorizontal: 15, borderRadius: 10, backgroundColor: THEME.lightBeige, alignItems: 'center' },
-  filterButtonActive: { backgroundColor: THEME.primary },
-  filterButtonText: { fontSize: 14, fontWeight: '600', color: THEME.secondary },
-  filterButtonTextActive: { color: THEME.white },
-  listContainer: { padding: 15 },
-  commandeCard: { backgroundColor: THEME.white, borderRadius: 15, padding: 15, marginBottom: 15, elevation: 4 },
-  cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 15 },
-  commandeId: { fontSize: 16, fontWeight: 'bold', color: THEME.darkBrown },
-  commandeDate: { fontSize: 12, color: THEME.gray, marginTop: 3 },
-  statutBadge: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 10, paddingVertical: 6, borderRadius: 12, gap: 5 },
-  statutText: { color: THEME.white, fontSize: 12, fontWeight: 'bold' },
-  cardContent: { gap: 8, marginBottom: 15 },
-  infoRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  infoText: { fontSize: 14, color: THEME.gray },
-  totalText: { fontSize: 16, fontWeight: 'bold', color: THEME.primary },
-  progressContainer: { marginTop: 10 },
-  progressBar: { height: 6, backgroundColor: THEME.lightBeige, borderRadius: 3, overflow: 'hidden' },
-  progressFill: { height: '100%', backgroundColor: THEME.primary },
-  progressText: { fontSize: 11, color: THEME.gray, marginTop: 5, textAlign: 'right' },
-  emptyContainer: { alignItems: 'center', paddingVertical: 60 },
-  emptyText: { fontSize: 16, color: THEME.gray, marginTop: 15 },
-  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' },
-  modalContent: { backgroundColor: THEME.white, borderTopLeftRadius: 25, borderTopRightRadius: 25, padding: 20, maxHeight: '90%' },
-  modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 },
-  modalTitle: { fontSize: 20, fontWeight: 'bold', color: THEME.darkBrown },
-  trackingContainer: { marginBottom: 20 },
-  trackingStep: { flexDirection: 'row', marginBottom: 20 },
+const makeStyles = (THEME, isDark) => StyleSheet.create({
+  container:              { flex: 1, backgroundColor: THEME.background },
+  filterContainer:        { flexDirection: 'row', padding: 15, backgroundColor: THEME.surface, gap: 10, elevation: 2 },
+  filterButton:           { flex: 1, paddingVertical: 10, paddingHorizontal: 15, borderRadius: 10, backgroundColor: THEME.inputBg, alignItems: 'center' },
+  filterButtonActive:     { backgroundColor: THEME.primary },
+  filterButtonText:       { fontSize: 14, fontWeight: '600', color: THEME.textSecondary },
+  filterButtonTextActive: { color: '#FFFFFF' },
+  listContainer:          { padding: 15 },
+  commandeCard:           { backgroundColor: THEME.card, borderRadius: 15, padding: 15, marginBottom: 15, elevation: 4, borderWidth: 1, borderColor: THEME.border },
+  cardHeader:             { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 15 },
+  commandeId:             { fontSize: 16, fontWeight: 'bold', color: THEME.text },
+  commandeDate:           { fontSize: 12, color: THEME.gray, marginTop: 3 },
+  statutBadge:            { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 10, paddingVertical: 6, borderRadius: 12, gap: 5 },
+  statutText:             { color: '#FFFFFF', fontSize: 12, fontWeight: 'bold' },
+  cardContent:            { gap: 8, marginBottom: 15 },
+  infoRow:                { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  infoText:               { fontSize: 14, color: THEME.textSecondary },
+  totalText:              { fontSize: 16, fontWeight: 'bold', color: THEME.primary },
+  progressContainer:      { marginTop: 10 },
+  progressBar:            { height: 6, backgroundColor: THEME.border, borderRadius: 3, overflow: 'hidden' },
+  progressFill:           { height: '100%', backgroundColor: THEME.primary },
+  progressText:           { fontSize: 11, color: THEME.gray, marginTop: 5, textAlign: 'right' },
+  emptyContainer:         { alignItems: 'center', paddingVertical: 60 },
+  emptyText:              { fontSize: 16, color: THEME.gray, marginTop: 15 },
+  modalOverlay:           { flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'flex-end' },
+  modalContent:           { backgroundColor: THEME.card, borderTopLeftRadius: 25, borderTopRightRadius: 25, padding: 20, maxHeight: '90%', borderTopWidth: 1, borderColor: THEME.border },
+  modalHeader:            { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 },
+  modalTitle:             { fontSize: 20, fontWeight: 'bold', color: THEME.text },
+  trackingContainer:      { marginBottom: 20 },
+  trackingStep:           { flexDirection: 'row', marginBottom: 20 },
   stepIndicatorContainer: { alignItems: 'center', marginRight: 15 },
-  stepIndicator: { width: 40, height: 40, borderRadius: 20, backgroundColor: THEME.lightBeige, justifyContent: 'center', alignItems: 'center', borderWidth: 2, borderColor: THEME.gray },
+  stepIndicator:          { width: 40, height: 40, borderRadius: 20, backgroundColor: THEME.inputBg, justifyContent: 'center', alignItems: 'center', borderWidth: 2, borderColor: THEME.border },
   stepIndicatorCompleted: { backgroundColor: THEME.primary, borderColor: THEME.primary },
-  stepIndicatorCurrent: { backgroundColor: THEME.accent, borderColor: THEME.accent },
-  stepNumber: { fontSize: 16, fontWeight: 'bold', color: THEME.gray },
-  stepLine: { width: 2, flex: 1, backgroundColor: THEME.lightBeige, marginTop: 5 },
-  stepLineCompleted: { backgroundColor: THEME.primary },
-  stepContent: { flex: 1, paddingTop: 8 },
-  stepTitle: { fontSize: 16, color: THEME.gray, fontWeight: '600' },
-  stepTitleCompleted: { color: THEME.primary },
-  stepTitleCurrent: { color: THEME.accent, fontWeight: 'bold' },
-  stepTime: { fontSize: 12, color: THEME.gray, marginTop: 3 },
-  detailsContainer: { backgroundColor: THEME.lightBeige, borderRadius: 12, padding: 15, marginBottom: 15 },
-  detailsTitle: { fontSize: 16, fontWeight: 'bold', color: THEME.darkBrown, marginBottom: 12 },
-  detailRow: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 6 },
-  detailLabel: { fontSize: 14, color: THEME.gray },
-  detailValue: { fontSize: 14, color: THEME.darkBrown, fontWeight: '600' },
-  totalRow: { borderTopWidth: 1, borderTopColor: THEME.secondary, marginTop: 8, paddingTop: 12 },
-  totalLabel: { fontSize: 16, fontWeight: 'bold', color: THEME.darkBrown },
-  totalValue: { fontSize: 18, fontWeight: 'bold', color: THEME.primary },
-  produitsContainer: { marginBottom: 20 },
-  produitsTitle: { fontSize: 16, fontWeight: 'bold', color: THEME.darkBrown, marginBottom: 10 },
-  produitRow: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: THEME.lightBeige },
-  produitNom: { flex: 1, fontSize: 14, color: THEME.darkBrown },
-  produitQuantite: { fontSize: 14, color: THEME.gray, marginHorizontal: 10 },
-  produitPrix: { fontSize: 14, fontWeight: 'bold', color: THEME.primary },
-  closeButton: { backgroundColor: THEME.primary, padding: 15, borderRadius: 12, alignItems: 'center' },
-  closeButtonText: { color: THEME.white, fontSize: 16, fontWeight: 'bold' },
+  stepIndicatorCurrent:   { backgroundColor: '#F5C518', borderColor: '#F5C518' },
+  stepNumber:             { fontSize: 16, fontWeight: 'bold', color: THEME.gray },
+  stepLine:               { width: 2, flex: 1, backgroundColor: THEME.border, marginTop: 5 },
+  stepLineCompleted:      { backgroundColor: THEME.primary },
+  stepContent:            { flex: 1, paddingTop: 8 },
+  stepTitle:              { fontSize: 16, color: THEME.gray, fontWeight: '600' },
+  stepTitleCompleted:     { color: THEME.primary },
+  stepTitleCurrent:       { color: '#F5C518', fontWeight: 'bold' },
+  stepTime:               { fontSize: 12, color: THEME.gray, marginTop: 3 },
+  detailsContainer:       { backgroundColor: THEME.inputBg, borderRadius: 12, padding: 15, marginBottom: 15 },
+  detailsTitle:           { fontSize: 16, fontWeight: 'bold', color: THEME.text, marginBottom: 12 },
+  detailRow:              { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 6 },
+  detailLabel:            { fontSize: 14, color: THEME.textSecondary },
+  detailValue:            { fontSize: 14, color: THEME.text, fontWeight: '600' },
+  totalRow:               { borderTopWidth: 1, borderTopColor: THEME.border, marginTop: 8, paddingTop: 12 },
+  totalLabel:             { fontSize: 16, fontWeight: 'bold', color: THEME.text },
+  totalValue:             { fontSize: 18, fontWeight: 'bold', color: THEME.primary },
+  produitsContainer:      { marginBottom: 20 },
+  produitsTitle:          { fontSize: 16, fontWeight: 'bold', color: THEME.text, marginBottom: 10 },
+  produitRow:             { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: THEME.border },
+  produitNom:             { flex: 1, fontSize: 14, color: THEME.text },
+  produitQuantite:        { fontSize: 14, color: THEME.gray, marginHorizontal: 10 },
+  produitPrix:            { fontSize: 14, fontWeight: 'bold', color: THEME.primary },
+  closeButton:            { backgroundColor: THEME.primary, padding: 15, borderRadius: 12, alignItems: 'center' },
+  closeButtonText:        { color: '#FFFFFF', fontSize: 16, fontWeight: 'bold' },
 });

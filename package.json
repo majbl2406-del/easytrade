@@ -6,7 +6,16 @@
     "start": "expo start",
     "android": "expo start --android",
     "ios": "expo start --ios",
-    "web": "expo start --web"
+    "web": "expo start --web",
+    "prebuild": "expo prebuild --clean",
+    "build:local:android": "expo prebuild --clean --platform android && cd android && ./gradlew assembleRelease && cd ..",
+    "build:local:android:debug": "expo prebuild --clean --platform android && cd android && ./gradlew assembleDebug && cd ..",
+    "build:local:ios": "expo prebuild --clean --platform ios && xcodebuild -workspace ios/easytrade.xcworkspace -scheme easytrade -configuration Release -derivedDataPath ios/build",
+    "build:android:preview": "eas build --platform android --profile preview",
+    "build:android:prod": "eas build --platform android --profile production",
+    "build:ios:prod": "eas build --platform ios --profile production",
+    "submit:android": "eas submit --platform android --profile production",
+    "submit:ios": "eas submit --platform ios --profile production"
   },
   "dependencies": {
     "@expo/vector-icons": "^13.0.0",
@@ -30,11 +39,13 @@
     "react-native-safe-area-context": "4.6.3",
     "react-native-screens": "~3.22.0",
     "react-native-web": "~0.19.6",
+    "react-native-web-webview": "^1.0.2",
     "react-native-webview": "13.2.2",
     "react-native-youtube-iframe": "^2.4.1"
   },
   "devDependencies": {
-    "@babel/core": "^7.20.0"
+    "@babel/core": "^7.20.0",
+    "eas-cli": "^16.20.0"
   },
   "private": true
 }
